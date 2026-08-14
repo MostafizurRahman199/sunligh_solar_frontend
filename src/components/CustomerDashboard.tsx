@@ -121,7 +121,7 @@ export default function CustomerDashboard() {
                         {p.status === 'APPROVED' ? (
                           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs font-semibold">
                             <CheckCircle2 size={14} />
-                            Approved
+                            Success / Paid
                           </span>
                         ) : p.status === 'REFUNDED' ? (
                           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30 text-xs font-semibold">

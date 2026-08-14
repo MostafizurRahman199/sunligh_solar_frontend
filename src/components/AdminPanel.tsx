@@ -200,7 +200,7 @@ export default function AdminPanel() {
               <Receipt size={24} />
             </div>
             <div>
-              <div className="text-xs text-slate-400 font-semibold uppercase">Approved Transactions</div>
+              <div className="text-xs text-slate-400 font-semibold uppercase">Successful Payments</div>
               <div className="text-2xl font-extrabold text-white">
                 {stats?.totalApprovedCount || 0} / {stats?.totalTransactions || 0}
               </div>
@@ -273,7 +273,7 @@ export default function AdminPanel() {
                   className="bg-slate-900/90 text-white px-3 py-2 rounded-xl border border-slate-700 text-xs font-semibold focus:outline-none"
                 >
                   <option value="ALL">All Statuses</option>
-                  <option value="APPROVED">Approved</option>
+                  <option value="APPROVED">Success / Paid</option>
                   <option value="PENDING">Pending</option>
                   <option value="DECLINED">Declined</option>
                   <option value="REFUNDED">Refunded</option>
@@ -331,7 +331,7 @@ export default function AdminPanel() {
                         <td className="py-3.5 px-4">
                           {p.status === 'APPROVED' ? (
                             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs font-semibold">
-                              <CheckCircle2 size={12} /> Approved
+                              <CheckCircle2 size={12} /> Success / Paid
                             </span>
                           ) : p.status === 'REFUNDED' ? (
                             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30 text-xs font-semibold">

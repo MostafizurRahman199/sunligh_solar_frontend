@@ -31,8 +31,6 @@ export default function Footer() {
               <li><a href="#/about" className="hover:text-brand-yellow transition-colors">About Us</a></li>
               <li><a href="#projects" className="hover:text-brand-yellow transition-colors">Our Projects</a></li>
               <li><a href="#checkout" className="hover:text-brand-yellow transition-colors">Pay Online / Checkout</a></li>
-              <li><a href="#/login" className="hover:text-brand-yellow transition-colors font-medium text-brand-orange">My Account / Sign In</a></li>
-              <li><a href="#/admin" className="hover:text-brand-yellow transition-colors text-amber-400 font-semibold flex items-center gap-1">🔒 Admin Panel</a></li>
             </ul>
           </div>
 
@@ -50,8 +48,6 @@ export default function Footer() {
         <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs">
           <p>© {new Date().getFullYear()} Sunlite Solar Australia. All rights reserved.</p>
           <div className="flex items-center gap-4 text-slate-400">
-            <a href="#/login" className="hover:text-white">Customer Login</a>
-            <span>•</span>
             <a href="#/admin" className="hover:text-brand-orange font-semibold text-slate-300">Admin Control Panel</a>
           </div>
         </div>

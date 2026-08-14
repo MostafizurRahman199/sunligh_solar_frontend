@@ -12,8 +12,10 @@ import {
   Building,
 } from 'lucide-react';
 import { motion } from 'motion/react';
+import { useAuth } from '../context/AuthContext';
 
 export default function CheckoutSection() {
+  const { user, token } = useAuth();
   const [amountInput, setAmountInput] = useState<string>('');
   const [invoiceNumberInput, setInvoiceNumberInput] = useState<string>('');
   const [descriptionInput, setDescriptionInput] = useState<string>('Solar System Payment');
@@ -29,6 +31,19 @@ export default function CheckoutSection() {
     state: 'NSW',
     postcode: '',
   });
+
+  // Auto fill customer details from logged in user if empty
+  useEffect(() => {
+    if (user) {
+      setCustomer((prev) => ({
+        ...prev,
+        firstName: prev.firstName || user.firstName || '',
+        lastName: prev.lastName || user.lastName || '',
+        email: prev.email || user.email || '',
+        phone: prev.phone || user.phone || '',
+      }));
+    }
+  }, [user]);
 
   const [paymentMethod, setPaymentMethod] = useState<'eway_shared' | 'eway_direct'>('eway_shared');
   const [cardDetails, setCardDetails] = useState({
@@ -106,7 +121,10 @@ export default function CheckoutSection() {
         // eWay Hosted Page Flow (Access Code)
         const res = await fetch(`${backendUrl}/create-access-code`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
           body: JSON.stringify({
             amount: calculatedAmountInCents,
             currencyCode: 'AUD',
@@ -150,7 +168,10 @@ export default function CheckoutSection() {
         // Direct Card Payment
         const res = await fetch(`${backendUrl}/direct`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
           body: JSON.stringify({
             amount: calculatedAmountInCents,
             currencyCode: 'AUD',
