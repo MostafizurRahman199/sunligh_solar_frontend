@@ -32,7 +32,7 @@ export default function Header({ isAboutPage = false, isContactPage = false, isS
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? 'bg-white shadow-md py-3' : 'bg-transparent py-5'
+        isLightNav ? 'bg-white/95 backdrop-blur-md shadow-md py-3' : 'bg-transparent py-5'
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
@@ -48,7 +48,7 @@ export default function Header({ isAboutPage = false, isContactPage = false, isS
               key={link.name}
               href={link.href}
               className={`text-sm font-medium hover:text-brand-orange transition-colors ${
-                isLightNav ? 'text-slate-600' : 'text-white'
+                isLightNav ? 'text-slate-700 font-semibold' : 'text-white'
               }`}
             >
               {link.name}
@@ -58,8 +58,8 @@ export default function Header({ isAboutPage = false, isContactPage = false, isS
 
         {/* Desktop CTA */}
         <div className="hidden lg:flex items-center gap-3">
-          <a href="tel:0498579245" className={`flex items-center gap-1.5 text-sm font-semibold hover:text-brand-orange transition-colors ${isLightNav ? 'text-brand-navy' : 'text-white'}`}>
-            <Phone size={16} />
+          <a href="tel:0498579245" className={`flex items-center gap-1.5 text-sm font-bold hover:text-brand-orange transition-colors ${isLightNav ? 'text-slate-900' : 'text-white'}`}>
+            <Phone size={16} className={isLightNav ? 'text-brand-orange' : 'text-white'} />
             <span>0498 579 245</span>
           </a>
           <a

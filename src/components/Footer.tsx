@@ -47,9 +47,6 @@ export default function Footer() {
 
         <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs">
           <p>© {new Date().getFullYear()} Sunlite Solar Australia. All rights reserved.</p>
-          <div className="flex items-center gap-4 text-slate-400">
-            <a href="#/admin" className="hover:text-brand-orange font-semibold text-slate-300">Admin Control Panel</a>
-          </div>
         </div>
       </div>
     </footer>

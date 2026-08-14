@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   CreditCard,
   ShieldCheck,
@@ -10,9 +10,99 @@ import {
   Check,
   Receipt,
   Building,
+  ChevronDown,
 } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '../context/AuthContext';
+
+interface SelectOption {
+  value: string;
+  label: string;
+}
+
+// Custom Theme-Consistent Smooth Dropdown Select Component
+function SmoothSelect({
+  value,
+  onChange,
+  options,
+  placeholder = 'Select option...',
+  className = '',
+}: {
+  value: string;
+  onChange: (val: string) => void;
+  options: SelectOption[];
+  placeholder?: string;
+  className?: string;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const selectedOption = options.find((o) => o.value === value);
+
+  return (
+    <div ref={containerRef} className={`relative ${className}`}>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className={`w-full bg-slate-900/90 hover:bg-slate-900 text-white px-4 py-2.5 rounded-xl border text-sm font-medium transition-all flex items-center justify-between gap-2 cursor-pointer outline-none ${
+          isOpen ? 'border-brand-orange ring-2 ring-brand-orange/30 shadow-lg shadow-brand-orange/10' : 'border-slate-700 hover:border-slate-600'
+        }`}
+      >
+        <span className="truncate">{selectedOption ? selectedOption.label : placeholder}</span>
+        <ChevronDown
+          size={16}
+          className={`text-slate-400 shrink-0 transition-transform duration-200 ${
+            isOpen ? 'rotate-180 text-brand-orange' : ''
+          }`}
+        />
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -6, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -6, scale: 0.98 }}
+            transition={{ duration: 0.15, ease: 'easeOut' }}
+            className="absolute left-0 right-0 top-full mt-1.5 z-50 max-h-60 overflow-y-auto custom-scrollbar bg-slate-900/95 border border-slate-700/90 rounded-2xl shadow-2xl backdrop-blur-xl p-1.5 space-y-0.5"
+          >
+            {options.map((opt) => {
+              const isSelected = opt.value === value;
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => {
+                    onChange(opt.value);
+                    setIsOpen(false);
+                  }}
+                  className={`w-full px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-between transition-all cursor-pointer ${
+                    isSelected
+                      ? 'bg-brand-orange/20 text-brand-orange border border-brand-orange/30 font-bold'
+                      : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                  }`}
+                >
+                  <span>{opt.label}</span>
+                  {isSelected && <Check size={14} className="text-brand-orange" />}
+                </button>
+              );
+            })}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
 
 export default function CheckoutSection() {
   const { user, token } = useAuth();
@@ -49,7 +139,7 @@ export default function CheckoutSection() {
   const [cardDetails, setCardDetails] = useState({
     name: '',
     number: '',
-    expiryMonth: '12',
+    expiryMonth: '02',
     expiryYear: '28',
     cvn: '',
   });
@@ -58,6 +148,51 @@ export default function CheckoutSection() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [paymentSuccess, setPaymentSuccess] = useState<any | null>(null);
   const [gatewayConfig, setGatewayConfig] = useState<{ mode: string; mockMode: boolean } | null>(null);
+
+  // Dynamic options for dropdowns
+  const stateOptions: SelectOption[] = [
+    { value: 'NSW', label: 'NSW - New South Wales' },
+    { value: 'VIC', label: 'VIC - Victoria' },
+    { value: 'QLD', label: 'QLD - Queensland' },
+    { value: 'ACT', label: 'ACT - Australian Capital Territory' },
+    { value: 'SA', label: 'SA - South Australia' },
+    { value: 'WA', label: 'WA - Western Australia' },
+    { value: 'TAS', label: 'TAS - Tasmania' },
+    { value: 'NT', label: 'NT - Northern Territory' },
+  ];
+
+  const expiryMonthOptions: SelectOption[] = Array.from({ length: 12 }, (_, i) => {
+    const val = (i + 1).toString().padStart(2, '0');
+    const monthNames = [
+      '01 - January',
+      '02 - February',
+      '03 - March',
+      '04 - April',
+      '05 - May',
+      '06 - June',
+      '07 - July',
+      '08 - August',
+      '09 - September',
+      '10 - October',
+      '11 - November',
+      '12 - December',
+    ];
+    return {
+      value: val,
+      label: monthNames[i],
+    };
+  });
+
+  // Dynamic 100-year range for Expiry Year (Current year up to 2126+)
+  const currentFullYear = new Date().getFullYear();
+  const expiryYearOptions: SelectOption[] = Array.from({ length: 100 }, (_, i) => {
+    const fullYr = currentFullYear + i;
+    const shortYr = fullYr.toString().slice(-2);
+    return {
+      value: shortYr,
+      label: `${fullYr}`,
+    };
+  });
 
   // Dynamic backend API URL from .env
   const backendBase = (
@@ -93,7 +228,7 @@ export default function CheckoutSection() {
     setCardDetails({
       name: '',
       number: '',
-      expiryMonth: '12',
+      expiryMonth: '02',
       expiryYear: '28',
       cvn: '',
     });
@@ -221,28 +356,17 @@ export default function CheckoutSection() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Section Header */}
         <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-orange/10 border border-brand-orange/30 text-brand-orange text-sm font-semibold mb-4">
-            <ShieldCheck size={16} />
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-sm font-semibold mb-4">
+            <ShieldCheck size={18} className="text-brand-yellow" />
             <span>eWay 256-Bit Encrypted Payment Portal</span>
           </div>
 
           <h2 className="text-3xl md:text-5xl font-heading font-extrabold text-white mb-4 tracking-tight">
-            Online <span className="text-gradient">Checkout & Invoice Payment</span>
+            Online <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-yellow to-brand-orange">Checkout & Invoice Payment</span>
           </h2>
           <p className="text-lg text-slate-300">
             Pay your deposit or invoice balance directly via Australia's trusted eWay payment gateway.
           </p>
-
-          {/* eWay Gateway Info */}
-          {gatewayConfig && (
-            <div className="mt-4 inline-flex items-center gap-2 text-xs px-3 py-1 bg-slate-800/90 border border-slate-700 rounded-full text-slate-400">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>Gateway: eWay Australia ({gatewayConfig.mode.toUpperCase()})</span>
-              {gatewayConfig.mockMode && (
-                <span className="text-amber-400 font-semibold">• Sandbox Mock Mode</span>
-              )}
-            </div>
-          )}
         </div>
 
         {/* Payment Form Container */}
@@ -305,7 +429,7 @@ export default function CheckoutSection() {
               {/* Payment Details Section */}
               <div className="mb-8">
                 <h3 className="text-lg font-bold font-heading text-white mb-4 flex items-center gap-2 pb-2 border-b border-slate-700">
-                  <Receipt className="text-brand-orange" size={20} />
+                  <Receipt className="text-brand-yellow" size={20} />
                   <span>1. Payment & Invoice Information</span>
                 </h3>
 
@@ -315,7 +439,7 @@ export default function CheckoutSection() {
                       Payment Amount (AUD $) *
                     </label>
                     <div className="relative">
-                      <span className="absolute left-4 top-3 text-brand-orange font-extrabold text-base">
+                      <span className="absolute left-4 top-3 text-brand-yellow font-extrabold text-base">
                         $
                       </span>
                       <input
@@ -362,7 +486,7 @@ export default function CheckoutSection() {
               {/* Customer Contact Details */}
               <div className="mb-8">
                 <h3 className="text-lg font-bold font-heading text-white mb-4 flex items-center gap-2 pb-2 border-b border-slate-700">
-                  <Building className="text-brand-orange" size={20} />
+                  <Building className="text-brand-yellow" size={20} />
                   <span>2. Customer Details</span>
                 </h3>
 
@@ -451,19 +575,11 @@ export default function CheckoutSection() {
 
                   <div>
                     <label className="block text-xs font-semibold text-slate-300 mb-1">State</label>
-                    <select
+                    <SmoothSelect
                       value={customer.state}
-                      onChange={(e) => setCustomer({ ...customer, state: e.target.value })}
-                      className="w-full bg-slate-900/80 text-white px-4 py-2.5 rounded-xl border border-slate-700 focus:outline-none focus:border-brand-orange text-sm"
-                    >
-                      <option value="NSW">NSW</option>
-                      <option value="VIC">VIC</option>
-                      <option value="QLD">QLD</option>
-                      <option value="ACT">ACT</option>
-                      <option value="SA">SA</option>
-                      <option value="WA">WA</option>
-                      <option value="TAS">TAS</option>
-                    </select>
+                      onChange={(val) => setCustomer({ ...customer, state: val })}
+                      options={stateOptions}
+                    />
                   </div>
 
                   <div>
@@ -482,7 +598,7 @@ export default function CheckoutSection() {
               {/* Payment Method Selector */}
               <div className="mb-8">
                 <h3 className="text-lg font-bold font-heading text-white mb-4 flex items-center gap-2 pb-2 border-b border-slate-700">
-                  <CreditCard className="text-brand-orange" size={20} />
+                  <CreditCard className="text-brand-yellow" size={20} />
                   <span>3. Payment Gateway Method</span>
                 </h3>
 
@@ -573,42 +689,38 @@ export default function CheckoutSection() {
                   <div className="grid grid-cols-3 gap-3">
                     <div>
                       <label className="block text-xs font-semibold text-slate-300 mb-1">
-                        Expiry Month
+                        Expiry Month *
                       </label>
-                      <select
+                      <input
+                        type="text"
+                        maxLength={2}
+                        required={paymentMethod === 'eway_direct'}
                         value={cardDetails.expiryMonth}
-                        onChange={(e) => setCardDetails({ ...cardDetails, expiryMonth: e.target.value })}
-                        className="w-full bg-slate-800 text-white px-3 py-2 rounded-xl border border-slate-600 text-sm"
-                      >
-                        {Array.from({ length: 12 }, (_, i) => {
-                          const val = (i + 1).toString().padStart(2, '0');
-                          return (
-                            <option key={val} value={val}>
-                              {val}
-                            </option>
-                          );
-                        })}
-                      </select>
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, '').slice(0, 2);
+                          setCardDetails({ ...cardDetails, expiryMonth: val });
+                        }}
+                        className="w-full bg-slate-800 text-white px-3 py-2.5 rounded-xl border border-slate-600 focus:outline-none focus:border-brand-orange text-sm font-mono text-center"
+                        placeholder="MM (e.g. 02)"
+                      />
                     </div>
 
                     <div>
                       <label className="block text-xs font-semibold text-slate-300 mb-1">
-                        Expiry Year
+                        Expiry Year *
                       </label>
-                      <select
+                      <input
+                        type="text"
+                        maxLength={4}
+                        required={paymentMethod === 'eway_direct'}
                         value={cardDetails.expiryYear}
-                        onChange={(e) => setCardDetails({ ...cardDetails, expiryYear: e.target.value })}
-                        className="w-full bg-slate-800 text-white px-3 py-2 rounded-xl border border-slate-600 text-sm"
-                      >
-                        {Array.from({ length: 10 }, (_, i) => {
-                          const yr = (26 + i).toString();
-                          return (
-                            <option key={yr} value={yr}>
-                              20{yr}
-                            </option>
-                          );
-                        })}
-                      </select>
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, '').slice(0, 4);
+                          setCardDetails({ ...cardDetails, expiryYear: val });
+                        }}
+                        className="w-full bg-slate-800 text-white px-3 py-2.5 rounded-xl border border-slate-600 focus:outline-none focus:border-brand-orange text-sm font-mono text-center"
+                        placeholder="YYYY (e.g. 2028)"
+                      />
                     </div>
 
                     <div>
@@ -620,9 +732,12 @@ export default function CheckoutSection() {
                         maxLength={4}
                         required={paymentMethod === 'eway_direct'}
                         value={cardDetails.cvn}
-                        onChange={(e) => setCardDetails({ ...cardDetails, cvn: e.target.value })}
-                        className="w-full bg-slate-800 text-white px-3 py-2 rounded-xl border border-slate-600 text-sm font-mono"
-                        placeholder="Write CVN"
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, '').slice(0, 4);
+                          setCardDetails({ ...cardDetails, cvn: val });
+                        }}
+                        className="w-full bg-slate-800 text-white px-3 py-2.5 rounded-xl border border-slate-600 focus:outline-none focus:border-brand-orange text-sm font-mono text-center"
+                        placeholder="CVN (e.g. 123)"
                       />
                     </div>
                   </div>
