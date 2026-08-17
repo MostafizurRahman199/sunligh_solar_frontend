@@ -204,14 +204,21 @@ export default function CheckoutSection() {
     .replace(/\/$/, '');
   const ewayEndpoint = `${backendBase}/api/payments/eway`;
 
-  // Fetch eWay gateway config status on mount
+  // Handle return redirect from eWay with AccessCode in URL
   useEffect(() => {
-    fetch(`${ewayEndpoint}/config`)
-      .then((res) => res.json())
-      .then((data) => setGatewayConfig(data))
-      .catch(() => {
-        setGatewayConfig({ mode: 'sandbox', mockMode: true });
-      });
+    const searchParams = new URLSearchParams(window.location.search);
+    const accessCode = searchParams.get('AccessCode') || searchParams.get('accessCode');
+    if (accessCode) {
+      setLoading(true);
+      fetch(`${ewayEndpoint}/complete/${accessCode}`)
+        .then((res) => res.json())
+        .then((data) => {
+          setPaymentSuccess(data);
+          window.history.replaceState({}, document.title, window.location.pathname);
+        })
+        .catch(() => setErrorMessage('Failed to complete eWay payment verification.'))
+        .finally(() => setLoading(false));
+    }
   }, [ewayEndpoint]);
 
   const resetForm = () => {
@@ -279,8 +286,8 @@ export default function CheckoutSection() {
               postalCode: customer.postcode,
               country: 'AU',
             },
-            redirectUrl: window.location.origin + '/#/checkout?status=success',
-            cancelUrl: window.location.origin + '/#/checkout?status=cancel',
+            redirectUrl: window.location.origin,
+            cancelUrl: window.location.origin,
           }),
         });
 
