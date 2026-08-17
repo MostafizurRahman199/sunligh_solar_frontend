@@ -605,38 +605,7 @@ export default function CheckoutSection() {
                 </div>
               </div>
 
-              {/* Payment Method Banner */}
-              <div className="mb-8">
-                <h3 className="text-lg font-bold font-heading text-white mb-4 flex items-center gap-2 pb-2 border-b border-slate-700">
-                  <CreditCard className="text-brand-yellow" size={20} />
-                  <span>3. Payment Security & Processing</span>
-                </h3>
-
-                <div className="p-5 rounded-2xl bg-slate-900 border border-brand-orange/40 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-lg">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-brand-orange/20 border border-brand-orange/40 text-brand-orange flex items-center justify-center font-bold">
-                      <ShieldCheck size={26} />
-                    </div>
-                    <div>
-                      <div className="font-bold text-base text-white flex items-center gap-2">
-                        <span>eWay Australia Hosted Checkout</span>
-                        <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-extrabold uppercase">
-                          PCI-DSS Level 1 Encrypted
-                        </span>
-                      </div>
-                      <div className="text-xs text-slate-400 mt-0.5">
-                        Supports Visa, Mastercard, American Express & AU Debit Cards
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 text-xs font-semibold text-slate-400 bg-slate-800/80 px-3.5 py-2 rounded-xl border border-slate-700">
-                    <Lock size={14} className="text-emerald-400" />
-                    <span>256-Bit SSL Bank Grade Security</span>
-                  </div>
-                </div>
-              </div>
-
+            
               {/* Error Display */}
               {errorMessage && (
                 <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/30 rounded-2xl flex items-center gap-3 text-rose-400 text-sm">
