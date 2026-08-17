@@ -605,154 +605,37 @@ export default function CheckoutSection() {
                 </div>
               </div>
 
-              {/* Payment Method Selector */}
+              {/* Payment Method Banner */}
               <div className="mb-8">
                 <h3 className="text-lg font-bold font-heading text-white mb-4 flex items-center gap-2 pb-2 border-b border-slate-700">
                   <CreditCard className="text-brand-yellow" size={20} />
-                  <span>3. Payment Gateway Method</span>
+                  <span>3. Payment Security & Processing</span>
                 </h3>
 
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div
-                    onClick={() => setPaymentMethod('eway_shared')}
-                    className={`cursor-pointer p-4 rounded-2xl border flex items-center gap-3 transition-all ${
-                      paymentMethod === 'eway_shared'
-                        ? 'bg-slate-900 border-brand-orange text-white ring-1 ring-brand-orange/50'
-                        : 'bg-slate-900/50 border-slate-700 text-slate-400 hover:border-slate-600'
-                    }`}
-                  >
-                    <div
-                      className={`w-5 h-5 rounded-full flex items-center justify-center border ${
-                        paymentMethod === 'eway_shared'
-                          ? 'border-brand-orange bg-brand-orange text-white'
-                          : 'border-slate-600'
-                      }`}
-                    >
-                      {paymentMethod === 'eway_shared' && <Check size={12} />}
+                <div className="p-5 rounded-2xl bg-slate-900 border border-brand-orange/40 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-lg">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-brand-orange/20 border border-brand-orange/40 text-brand-orange flex items-center justify-center font-bold">
+                      <ShieldCheck size={26} />
                     </div>
                     <div>
-                      <div className="font-bold text-sm text-white">eWay Hosted Payment Page</div>
-                      <div className="text-xs text-slate-400">
-                        Official eWay Australia secure checkout redirect
+                      <div className="font-bold text-base text-white flex items-center gap-2">
+                        <span>eWay Australia Hosted Checkout</span>
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-extrabold uppercase">
+                          PCI-DSS Level 1 Encrypted
+                        </span>
+                      </div>
+                      <div className="text-xs text-slate-400 mt-0.5">
+                        Supports Visa, Mastercard, American Express & AU Debit Cards
                       </div>
                     </div>
                   </div>
 
-                  <div
-                    onClick={() => setPaymentMethod('eway_direct')}
-                    className={`cursor-pointer p-4 rounded-2xl border flex items-center gap-3 transition-all ${
-                      paymentMethod === 'eway_direct'
-                        ? 'bg-slate-900 border-brand-orange text-white ring-1 ring-brand-orange/50'
-                        : 'bg-slate-900/50 border-slate-700 text-slate-400 hover:border-slate-600'
-                    }`}
-                  >
-                    <div
-                      className={`w-5 h-5 rounded-full flex items-center justify-center border ${
-                        paymentMethod === 'eway_direct'
-                          ? 'border-brand-orange bg-brand-orange text-white'
-                          : 'border-slate-600'
-                      }`}
-                    >
-                      {paymentMethod === 'eway_direct' && <Check size={12} />}
-                    </div>
-                    <div>
-                      <div className="font-bold text-sm text-white">Direct Card Entry</div>
-                      <div className="text-xs text-slate-400">
-                        Process directly using eWay Rapid API
-                      </div>
-                    </div>
+                  <div className="flex items-center gap-2 text-xs font-semibold text-slate-400 bg-slate-800/80 px-3.5 py-2 rounded-xl border border-slate-700">
+                    <Lock size={14} className="text-emerald-400" />
+                    <span>256-Bit SSL Bank Grade Security</span>
                   </div>
                 </div>
               </div>
-
-              {/* Direct Card Inputs if selected */}
-              {paymentMethod === 'eway_direct' && (
-                <div className="bg-slate-900/90 p-5 rounded-2xl border border-slate-700 mb-8 space-y-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">
-                      Cardholder Name *
-                    </label>
-                    <input
-                      type="text"
-                      required={paymentMethod === 'eway_direct'}
-                      value={cardDetails.name}
-                      onChange={(e) => setCardDetails({ ...cardDetails, name: e.target.value })}
-                      className="w-full bg-slate-800 text-white px-4 py-2.5 rounded-xl border border-slate-600 text-sm"
-                      placeholder="Write cardholder name"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">
-                      Card Number *
-                    </label>
-                    <input
-                      type="text"
-                      required={paymentMethod === 'eway_direct'}
-                      value={cardDetails.number}
-                      onChange={(e) => setCardDetails({ ...cardDetails, number: e.target.value })}
-                      className="w-full bg-slate-800 text-white px-4 py-2.5 rounded-xl border border-slate-600 text-sm font-mono"
-                      placeholder="Write credit card number"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-3">
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-300 mb-1">
-                        Expiry Month *
-                      </label>
-                      <input
-                        type="text"
-                        maxLength={2}
-                        required={paymentMethod === 'eway_direct'}
-                        value={cardDetails.expiryMonth}
-                        onChange={(e) => {
-                          const val = e.target.value.replace(/\D/g, '').slice(0, 2);
-                          setCardDetails({ ...cardDetails, expiryMonth: val });
-                        }}
-                        className="w-full bg-slate-800 text-white px-3 py-2.5 rounded-xl border border-slate-600 focus:outline-none focus:border-brand-orange text-sm font-mono text-center"
-                        placeholder="MM (e.g. 02)"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-300 mb-1">
-                        Expiry Year *
-                      </label>
-                      <input
-                        type="text"
-                        maxLength={4}
-                        required={paymentMethod === 'eway_direct'}
-                        value={cardDetails.expiryYear}
-                        onChange={(e) => {
-                          const val = e.target.value.replace(/\D/g, '').slice(0, 4);
-                          setCardDetails({ ...cardDetails, expiryYear: val });
-                        }}
-                        className="w-full bg-slate-800 text-white px-3 py-2.5 rounded-xl border border-slate-600 focus:outline-none focus:border-brand-orange text-sm font-mono text-center"
-                        placeholder="YYYY (e.g. 2028)"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-300 mb-1">
-                        CVN / CVC *
-                      </label>
-                      <input
-                        type="text"
-                        maxLength={4}
-                        required={paymentMethod === 'eway_direct'}
-                        value={cardDetails.cvn}
-                        onChange={(e) => {
-                          const val = e.target.value.replace(/\D/g, '').slice(0, 4);
-                          setCardDetails({ ...cardDetails, cvn: val });
-                        }}
-                        className="w-full bg-slate-800 text-white px-3 py-2.5 rounded-xl border border-slate-600 focus:outline-none focus:border-brand-orange text-sm font-mono text-center"
-                        placeholder="CVN (e.g. 123)"
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
 
               {/* Error Display */}
               {errorMessage && (
