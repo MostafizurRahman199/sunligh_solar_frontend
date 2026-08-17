@@ -1,6 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { ShieldCheck, DollarSign, Users as UsersIcon, Receipt, CheckCircle2, XCircle, RefreshCw, Clock, Search, LogOut, RotateCcw } from 'lucide-react';
+import {
+  ShieldCheck,
+  DollarSign,
+  Users as UsersIcon,
+  Receipt,
+  CheckCircle2,
+  XCircle,
+  RefreshCw,
+  Clock,
+  Search,
+  LogOut,
+  RotateCcw,
+  Phone,
+  User as UserIcon,
+  ChevronLeft,
+  ChevronRight,
+} from 'lucide-react';
+import Swal from 'sweetalert2';
 
 interface AdminStats {
   totalTransactions: number;
@@ -40,6 +57,21 @@ interface UserRecord {
   createdAt: string;
 }
 
+const themeSwal = Swal.mixin({
+  customClass: {
+    popup: 'bg-slate-900 border border-slate-700 rounded-3xl text-white shadow-2xl p-6 font-sans',
+    title: 'text-xl font-bold font-heading text-white mb-2',
+    htmlContainer: 'text-slate-300 text-sm mt-2 mb-4 leading-relaxed',
+    confirmButton:
+      'bg-rose-600 hover:bg-rose-700 text-white font-bold px-6 py-2.5 rounded-xl cursor-pointer shadow-md transition-all mx-2 text-sm',
+    cancelButton:
+      'bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold px-6 py-2.5 rounded-xl cursor-pointer shadow-md transition-all mx-2 text-sm',
+  },
+  buttonsStyling: false,
+  background: '#0f172a',
+  color: '#ffffff',
+});
+
 export default function AdminPanel() {
   const { user, token, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<'payments' | 'users'>('payments');
@@ -52,8 +84,10 @@ export default function AdminPanel() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
+
   const [refundingId, setRefundingId] = useState<string | null>(null);
-  const [refundMessage, setRefundMessage] = useState<string | null>(null);
 
   const backendBase = (
     import.meta.env.VITE_BACKEND_URL ||
@@ -96,10 +130,21 @@ export default function AdminPanel() {
 
   const handleRefund = async (transactionId: string, amount: number) => {
     if (!token || !transactionId) return;
-    if (!window.confirm(`Are you sure you want to refund transaction #${transactionId} for $${(amount / 100).toFixed(2)} AUD?`)) return;
+
+    const formattedAmount = (amount / 100).toFixed(2);
+    const result = await themeSwal.fire({
+      title: 'Confirm Payment Refund',
+      html: `Are you sure you want to refund transaction <b class="text-brand-orange font-mono">#${transactionId}</b> for <b class="text-emerald-400 font-bold">$${formattedAmount} AUD</b>?<br/><span class="text-xs text-slate-400 mt-2 block">This action will communicate directly with eWay Australia to return funds to the customer.</span>`,
+      icon: 'warning',
+      iconColor: '#f97316',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, Process Refund',
+      cancelButtonText: 'Cancel',
+    });
+
+    if (!result.isConfirmed) return;
 
     setRefundingId(transactionId);
-    setRefundMessage(null);
 
     try {
       const res = await fetch(`${backendBase}/api/payments/eway/refund`, {
@@ -116,27 +161,57 @@ export default function AdminPanel() {
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Refund failed');
+      if (!res.ok) throw new Error(data.message || 'Refund processing failed');
 
-      setRefundMessage(`Refund successful for transaction #${transactionId}`);
+      await themeSwal.fire({
+        title: 'Refund Successful',
+        html: `Transaction <b class="text-brand-orange font-mono">#${transactionId}</b> ($${formattedAmount} AUD) has been successfully refunded via eWay.`,
+        icon: 'success',
+        iconColor: '#10b981',
+      });
+
       fetchAdminData();
     } catch (err: any) {
-      setRefundMessage(`Refund Error: ${err.message}`);
+      themeSwal.fire({
+        title: 'Refund Error',
+        text: err.message || 'Failed to complete refund operation.',
+        icon: 'error',
+        iconColor: '#ef4444',
+      });
     } finally {
       setRefundingId(null);
     }
   };
 
   const filteredPayments = payments.filter((p) => {
+    const fullName = `${p.customerFirstName || ''} ${p.customerLastName || ''}`.trim().toLowerCase();
+    const userFullName = p.user ? `${p.user.firstName || ''} ${p.user.lastName || ''}`.trim().toLowerCase() : '';
+    const query = searchQuery.toLowerCase().trim();
+
     const matchesSearch =
-      p.customerEmail?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.invoiceNumber?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.transactionId?.toLowerCase().includes(searchQuery.toLowerCase());
+      !query ||
+      fullName.includes(query) ||
+      userFullName.includes(query) ||
+      p.customerEmail?.toLowerCase().includes(query) ||
+      p.customerPhone?.toLowerCase().includes(query) ||
+      p.invoiceNumber?.toLowerCase().includes(query) ||
+      p.transactionId?.toLowerCase().includes(query);
 
     const matchesStatus = statusFilter === 'ALL' || p.status === statusFilter;
 
     return matchesSearch && matchesStatus;
   });
+
+  // Reset pagination on search query or filter change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, statusFilter]);
+
+  const totalPages = Math.ceil(filteredPayments.length / itemsPerPage) || 1;
+  const paginatedPayments = filteredPayments.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   if (user?.role !== 'ADMIN') {
     return (
@@ -160,7 +235,7 @@ export default function AdminPanel() {
 
   return (
     <div className="min-h-screen py-24 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white px-4 sm:px-6 lg:px-8">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         {/* Header Bar */}
         <div className="bg-slate-800/90 border border-slate-700/80 rounded-3xl p-6 md:p-8 shadow-2xl backdrop-blur-md mb-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
@@ -224,13 +299,6 @@ export default function AdminPanel() {
           </div>
         </div>
 
-        {/* Refund Status Alert */}
-        {refundMessage && (
-          <div className="mb-6 p-4 bg-brand-orange/10 border border-brand-orange/30 rounded-2xl text-brand-orange text-sm font-semibold">
-            {refundMessage}
-          </div>
-        )}
-
         {/* Tab Navigation */}
         <div className="flex gap-4 border-b border-slate-700 mb-6 pb-2">
           <button
@@ -260,13 +328,13 @@ export default function AdminPanel() {
           <div className="bg-slate-800/90 border border-slate-700/80 rounded-3xl p-6 md:p-8 shadow-2xl backdrop-blur-md">
             {/* Filter Bar */}
             <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
-              <div className="relative w-full md:w-80">
+              <div className="relative w-full md:w-96">
                 <Search size={16} className="absolute left-3.5 top-3 text-slate-400" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search by email, invoice #, TxID..."
+                  placeholder="Search by name, phone, email, invoice #, TxID..."
                   className="w-full bg-slate-900/90 text-white pl-10 pr-4 py-2 rounded-xl border border-slate-700 text-sm focus:outline-none focus:border-brand-orange"
                 />
               </div>
@@ -292,84 +360,135 @@ export default function AdminPanel() {
             ) : filteredPayments.length === 0 ? (
               <div className="py-12 text-center text-slate-400">No transactions found.</div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm">
-                  <thead>
-                    <tr className="border-b border-slate-700 text-slate-400 text-xs font-semibold uppercase">
-                      <th className="py-3 px-4">Date</th>
-                      <th className="py-3 px-4">Customer Email</th>
-                      <th className="py-3 px-4">Invoice #</th>
-                      <th className="py-3 px-4">TxID</th>
-                      <th className="py-3 px-4">Amount</th>
-                      <th className="py-3 px-4">Status</th>
-                      <th className="py-3 px-4">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-700/50">
-                    {filteredPayments.map((p) => (
-                      <tr key={p.id} className="hover:bg-slate-700/30 transition-colors">
-                        <td className="py-3.5 px-4 text-slate-300 font-medium">
-                          {new Date(p.createdAt).toLocaleDateString('en-AU', {
-                            day: '2-digit',
-                            month: 'short',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
-                        </td>
-                        <td className="py-3.5 px-4 font-medium text-white">
-                          {p.customerEmail}
-                          {p.user && (
-                            <span className="block text-[10px] text-brand-orange font-semibold">
-                              (Registered Customer)
-                            </span>
-                          )}
-                        </td>
-                        <td className="py-3.5 px-4 font-mono font-semibold text-white">
-                          {p.invoiceNumber}
-                        </td>
-                        <td className="py-3.5 px-4 font-mono text-xs text-slate-400">
-                          {p.transactionId ? `#${p.transactionId}` : 'N/A'}
-                        </td>
-                        <td className="py-3.5 px-4 font-bold text-white">
-                          ${(p.amount / 100).toFixed(2)} AUD
-                        </td>
-                        <td className="py-3.5 px-4">
-                          {p.status === 'APPROVED' ? (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs font-semibold">
-                              <CheckCircle2 size={12} /> Success / Paid
-                            </span>
-                          ) : p.status === 'REFUNDED' ? (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30 text-xs font-semibold">
-                              <RefreshCw size={12} /> Refunded
-                            </span>
-                          ) : p.status === 'DECLINED' ? (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/30 text-xs font-semibold">
-                              <XCircle size={12} /> Declined
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/30 text-xs font-semibold">
-                              <Clock size={12} /> Pending
-                            </span>
-                          )}
-                        </td>
-                        <td className="py-3.5 px-4">
-                          {p.status === 'APPROVED' && p.transactionId && (
-                            <button
-                              onClick={() => handleRefund(p.transactionId, p.amount)}
-                              disabled={refundingId === p.transactionId}
-                              className="px-2.5 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 font-semibold text-xs transition-all border border-rose-500/40 flex items-center gap-1 cursor-pointer"
-                            >
-                              <RotateCcw size={12} />
-                              <span>Refund</span>
-                            </button>
-                          )}
-                        </td>
+              <>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm">
+                    <thead>
+                      <tr className="border-b border-slate-700 text-slate-400 text-xs font-semibold uppercase">
+                        <th className="py-3 px-4">Date</th>
+                        <th className="py-3 px-4">Customer Name</th>
+                        <th className="py-3 px-4">Contact Info</th>
+                        <th className="py-3 px-4">Invoice #</th>
+                        <th className="py-3 px-4">TxID</th>
+                        <th className="py-3 px-4">Amount</th>
+                        <th className="py-3 px-4">Status</th>
+                        <th className="py-3 px-4">Actions</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody className="divide-y divide-slate-700/50">
+                      {paginatedPayments.map((p) => {
+                        const displayName =
+                          `${p.customerFirstName || ''} ${p.customerLastName || ''}`.trim() ||
+                          (p.user ? `${p.user.firstName} ${p.user.lastName}` : 'Guest Customer');
+
+                        return (
+                          <tr key={p.id} className="hover:bg-slate-700/30 transition-colors">
+                            <td className="py-3.5 px-4 text-slate-300 font-medium whitespace-nowrap text-xs">
+                              {new Date(p.createdAt).toLocaleDateString('en-AU', {
+                                day: '2-digit',
+                                month: 'short',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              })}
+                            </td>
+                            <td className="py-3.5 px-4 font-bold text-white">
+                              <div className="flex items-center gap-1.5">
+                                <UserIcon size={14} className="text-brand-orange" />
+                                <span>{displayName}</span>
+                              </div>
+                              {p.user && (
+                                <span className="block text-[10px] text-brand-orange font-semibold mt-0.5">
+                                  (Registered Member)
+                                </span>
+                              )}
+                            </td>
+                            <td className="py-3.5 px-4 font-medium text-slate-300">
+                              <div className="text-white text-xs">{p.customerEmail}</div>
+                              {p.customerPhone && (
+                                <div className="text-xs text-slate-400 font-mono flex items-center gap-1 mt-0.5">
+                                  <Phone size={11} className="text-brand-orange" />
+                                  <span>{p.customerPhone}</span>
+                                </div>
+                              )}
+                            </td>
+                            <td className="py-3.5 px-4 font-mono font-semibold text-white text-xs">
+                              {p.invoiceNumber}
+                            </td>
+                            <td className="py-3.5 px-4 font-mono text-xs text-slate-400">
+                              {p.transactionId ? `#${p.transactionId}` : 'N/A'}
+                            </td>
+                            <td className="py-3.5 px-4 font-bold text-white whitespace-nowrap">
+                              ${(p.amount / 100).toFixed(2)} AUD
+                            </td>
+                            <td className="py-3.5 px-4">
+                              {p.status === 'APPROVED' ? (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs font-semibold">
+                                  <CheckCircle2 size={12} /> Success / Paid
+                                </span>
+                              ) : p.status === 'REFUNDED' ? (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/30 text-xs font-semibold">
+                                  <RefreshCw size={12} /> Refunded
+                                </span>
+                              ) : p.status === 'DECLINED' ? (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/30 text-xs font-semibold">
+                                  <XCircle size={12} /> Declined
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/30 text-xs font-semibold">
+                                  <Clock size={12} /> Pending
+                                </span>
+                              )}
+                            </td>
+                            <td className="py-3.5 px-4">
+                              {p.status === 'APPROVED' && p.transactionId && (
+                                <button
+                                  onClick={() => handleRefund(p.transactionId, p.amount)}
+                                  disabled={refundingId === p.transactionId}
+                                  className="px-2.5 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 font-semibold text-xs transition-all border border-rose-500/40 flex items-center gap-1 cursor-pointer"
+                                >
+                                  <RotateCcw size={12} />
+                                  <span>Refund</span>
+                                </button>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Pagination Controls */}
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 pt-4 border-t border-slate-700 text-xs text-slate-400">
+                  <div>
+                    Showing <span className="text-white font-bold">{(currentPage - 1) * itemsPerPage + 1}</span> to{' '}
+                    <span className="text-white font-bold">{Math.min(currentPage * itemsPerPage, filteredPayments.length)}</span> of{' '}
+                    <span className="text-white font-bold">{filteredPayments.length}</span> transactions
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                      disabled={currentPage === 1}
+                      className="px-3 py-1.5 rounded-xl bg-slate-700 text-slate-300 hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed font-semibold transition-all flex items-center gap-1 cursor-pointer"
+                    >
+                      <ChevronLeft size={14} />
+                      <span>Previous</span>
+                    </button>
+                    <span className="px-3 py-1.5 rounded-xl bg-slate-900 text-brand-orange font-bold border border-slate-700">
+                      Page {currentPage} of {totalPages}
+                    </span>
+                    <button
+                      onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                      disabled={currentPage === totalPages}
+                      className="px-3 py-1.5 rounded-xl bg-slate-700 text-slate-300 hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed font-semibold transition-all flex items-center gap-1 cursor-pointer"
+                    >
+                      <span>Next</span>
+                      <ChevronRight size={14} />
+                    </button>
+                  </div>
+                </div>
+              </>
             )}
           </div>
         )}
