@@ -16,6 +16,8 @@ import {
   User as UserIcon,
   ChevronLeft,
   ChevronRight,
+  Calendar,
+  TrendingUp,
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 
@@ -23,6 +25,10 @@ interface AdminStats {
   totalTransactions: number;
   totalApprovedCount: number;
   totalRevenueAud: string;
+  dailyRevenueAud?: string;
+  weeklyRevenueAud?: string;
+  monthlyRevenueAud?: string;
+  yearlyRevenueAud?: string;
 }
 
 interface PaymentRecord {
@@ -264,37 +270,60 @@ export default function AdminPanel() {
           </button>
         </div>
 
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-slate-800/90 border border-slate-700/80 rounded-2xl p-6 shadow-xl flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
-              <DollarSign size={24} />
+        {/* Revenue Breakdown & Statistics Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+          {/* Total Revenue */}
+          <div className="bg-slate-800/90 border border-brand-orange/40 rounded-2xl p-5 shadow-xl flex items-center gap-3.5 ring-1 ring-brand-orange/20">
+            <div className="w-11 h-11 rounded-xl bg-brand-orange/20 text-brand-orange flex items-center justify-center font-bold shrink-0">
+              <DollarSign size={22} />
             </div>
             <div>
-              <div className="text-xs text-slate-400 font-semibold uppercase">Total Revenue (AUD)</div>
-              <div className="text-2xl font-extrabold text-white">${stats?.totalRevenueAud || '0.00'}</div>
+              <div className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">Total Revenue</div>
+              <div className="text-xl font-black text-white">${stats?.totalRevenueAud || '0.00'}</div>
             </div>
           </div>
 
-          <div className="bg-slate-800/90 border border-slate-700/80 rounded-2xl p-6 shadow-xl flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold">
-              <Receipt size={24} />
+          {/* Daily Revenue */}
+          <div className="bg-slate-800/90 border border-slate-700/80 rounded-2xl p-5 shadow-xl flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold shrink-0">
+              <TrendingUp size={22} />
             </div>
             <div>
-              <div className="text-xs text-slate-400 font-semibold uppercase">Successful Payments</div>
-              <div className="text-2xl font-extrabold text-white">
-                {stats?.totalApprovedCount || 0} / {stats?.totalTransactions || 0}
-              </div>
+              <div className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">Daily Revenue</div>
+              <div className="text-xl font-black text-white">${stats?.dailyRevenueAud || '0.00'}</div>
             </div>
           </div>
 
-          <div className="bg-slate-800/90 border border-slate-700/80 rounded-2xl p-6 shadow-xl flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold">
-              <UsersIcon size={24} />
+          {/* Weekly Revenue */}
+          <div className="bg-slate-800/90 border border-slate-700/80 rounded-2xl p-5 shadow-xl flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold shrink-0">
+              <Calendar size={22} />
             </div>
             <div>
-              <div className="text-xs text-slate-400 font-semibold uppercase">Registered Users</div>
-              <div className="text-2xl font-extrabold text-white">{usersList.length} Users</div>
+              <div className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">Weekly Revenue</div>
+              <div className="text-xl font-black text-white">${stats?.weeklyRevenueAud || '0.00'}</div>
+            </div>
+          </div>
+
+          {/* Monthly Revenue */}
+          <div className="bg-slate-800/90 border border-slate-700/80 rounded-2xl p-5 shadow-xl flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold shrink-0">
+              <Calendar size={22} />
+            </div>
+            <div>
+              <div className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">Monthly Revenue</div>
+              <div className="text-xl font-black text-white">${stats?.monthlyRevenueAud || '0.00'}</div>
+            </div>
+          </div>
+
+          {/* Yearly Revenue */}
+          <div className="bg-slate-800/90 border border-slate-700/80 rounded-2xl p-5 shadow-xl flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold shrink-0">
+              <Calendar size={22} />
+            </div>
+            <div>
+              <div className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">Yearly Revenue</div>
+              <div className="text-xl font-black text-white">${stats?.yearlyRevenueAud || '0.00'}</div>
             </div>
           </div>
         </div>
