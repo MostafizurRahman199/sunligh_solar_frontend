@@ -197,8 +197,11 @@ export default function CheckoutSection() {
   // Dynamic backend API URL from .env
   const backendBase = (
     import.meta.env.VITE_BACKEND_URL ||
+    import.meta.env.VITE_API_URL ||
     'http://localhost:5000'
-  ).replace(/\/$/, '');
+  )
+    .replace(/\/api\/?$/, '')
+    .replace(/\/$/, '');
   const ewayEndpoint = `${backendBase}/api/payments/eway`;
 
   // Fetch eWay gateway config status on mount

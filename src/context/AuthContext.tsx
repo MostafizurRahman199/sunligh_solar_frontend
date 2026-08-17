@@ -28,7 +28,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
   const [loading, setLoading] = useState(false);
 
-  const backendBase = (import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000').replace(/\/$/, '');
+  const backendBase = (
+    import.meta.env.VITE_BACKEND_URL ||
+    import.meta.env.VITE_API_URL ||
+    'http://localhost:5000'
+  )
+    .replace(/\/api\/?$/, '')
+    .replace(/\/$/, '');
 
   useEffect(() => {
     if (token) {

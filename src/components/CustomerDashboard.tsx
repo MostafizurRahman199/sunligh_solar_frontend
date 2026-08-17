@@ -19,7 +19,13 @@ export default function CustomerDashboard() {
   const [payments, setPayments] = useState<PaymentItem[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const backendBase = (import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000').replace(/\/$/, '');
+  const backendBase = (
+    import.meta.env.VITE_BACKEND_URL ||
+    import.meta.env.VITE_API_URL ||
+    'http://localhost:5000'
+  )
+    .replace(/\/api\/?$/, '')
+    .replace(/\/$/, '');
 
   useEffect(() => {
     if (token) {
