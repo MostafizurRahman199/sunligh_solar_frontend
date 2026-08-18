@@ -31,7 +31,7 @@ export default function Header({ isAboutPage = false, isContactPage = false, isS
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ${
         isLightNav ? 'bg-white/95 backdrop-blur-md shadow-md py-3' : 'bg-transparent py-5'
       }`}
     >
@@ -90,7 +90,7 @@ export default function Header({ isAboutPage = false, isContactPage = false, isS
 
         {/* Mobile Menu Toggle */}
         <button
-          className="lg:hidden p-2 text-brand-navy bg-white rounded-md shadow-sm"
+          className="lg:hidden p-2 text-brand-navy bg-white rounded-md shadow-sm cursor-pointer"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
         >
           {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -104,35 +104,39 @@ export default function Header({ isAboutPage = false, isContactPage = false, isS
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="lg:hidden absolute top-full left-0 right-0 bg-white shadow-xl border-t border-slate-100"
+            className="lg:hidden absolute top-full left-0 right-0 bg-white shadow-2xl border-t border-slate-100 max-h-[85vh] overflow-y-auto"
           >
-            <div className="flex flex-col p-4 gap-4">
+            <div className="flex flex-col p-4 gap-1.5">
               {navLinks.map((link) => (
                 <a
                   key={link.name}
                   href={link.href}
-                  className="text-lg font-medium text-slate-800 hover:text-brand-orange py-2 border-b border-slate-50 last:border-0"
+                  className="text-base font-semibold text-slate-800 hover:text-brand-orange py-1.5 px-2 rounded-lg hover:bg-slate-50 border-b border-slate-100/60 last:border-0 transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   {link.name}
                 </a>
               ))}
-              <div className="flex flex-col gap-3 mt-4">
-                <a href="tel:0498579245" className="flex justify-center items-center gap-2 py-3 rounded-xl bg-slate-50 text-brand-navy font-semibold">
-                  <Phone size={20} />
+              <div className="flex flex-col gap-2.5 mt-3 pt-2 border-t border-slate-100">
+                <a
+                  href="tel:0498579245"
+                  className="flex justify-center items-center gap-2 py-2.5 rounded-xl bg-slate-100 text-brand-navy font-bold text-sm hover:bg-slate-200 transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <Phone size={18} className="text-brand-orange" />
                   <span>Call 0498 579 245</span>
                 </a>
                 <a
                   href="#checkout"
-                  className="bg-gradient-brand text-white text-center py-3 rounded-xl font-bold text-lg flex items-center justify-center gap-2"
+                  className="bg-gradient-brand text-white text-center py-2.5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  <CreditCard size={20} />
+                  <CreditCard size={18} />
                   <span>Pay Online / Checkout</span>
                 </a>
                 <a
                   href="#contact"
-                  className="bg-brand-navy text-white text-center py-3 rounded-xl font-bold text-lg"
+                  className="bg-brand-navy text-white text-center py-2.5 rounded-xl font-bold text-sm shadow-md hover:bg-slate-800 transition-colors"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Request a Free Quote
