@@ -75,7 +75,7 @@ export default function FAQ() {
         </div>
         
         <div className="mt-12 text-center">
-            <p className="text-slate-500">Still have questions? <a href="#/contact" className="text-brand-orange font-bold hover:underline">Contact our Sydney team</a></p>
+            <p className="text-slate-500">Still have questions? <a href="#contact" className="text-brand-orange font-bold hover:underline">Contact our Sydney team</a></p>
         </div>
       </div>
     </section>

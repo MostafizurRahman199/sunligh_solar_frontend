@@ -36,7 +36,7 @@ export default function Projects() {
               100+ Successful Installations Across Sydney
             </h3>
           </div>
-          <a href="#/contact" className="hidden md:inline-flex bg-white border border-slate-200 text-brand-navy font-bold py-3 px-6 rounded-full hover:border-brand-orange hover:text-brand-orange transition-colors">
+          <a href="#contact" className="hidden md:inline-flex bg-white border border-slate-200 text-brand-navy font-bold py-3 px-6 rounded-full hover:border-brand-orange hover:text-brand-orange transition-colors">
             View All Projects
           </a>
         </div>
@@ -74,7 +74,7 @@ export default function Projects() {
         </div>
         
         <div className="mt-10 text-center md:hidden">
-           <a href="#/contact" className="inline-flex bg-white border border-slate-200 text-brand-navy font-bold py-3 px-8 rounded-full hover:border-brand-orange hover:text-brand-orange transition-colors w-full justify-center">
+           <a href="#contact" className="inline-flex bg-white border border-slate-200 text-brand-navy font-bold py-3 px-8 rounded-full hover:border-brand-orange hover:text-brand-orange transition-colors w-full justify-center">
              View All Projects
            </a>
         </div>

@@ -57,7 +57,7 @@ export default function Hero() {
             className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start"
           >
             <a
-              href="#/contact"
+              href="#contact"
               className="w-full sm:w-auto bg-gradient-brand text-white px-8 py-4 rounded-full text-lg font-bold hover:scale-105 transition-transform flex items-center justify-center gap-2 shadow-xl shadow-brand-orange/20"
             >
               Get Your Free Quote

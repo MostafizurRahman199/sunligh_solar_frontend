@@ -43,7 +43,7 @@ export default function Savings() {
             </div>
             
             <div className="mt-10">
-               <a href="#/contact" className="inline-flex items-center gap-2 text-brand-yellow font-bold hover:underline">
+               <a href="#contact" className="inline-flex items-center gap-2 text-brand-yellow font-bold hover:underline">
                  Calculate your exact roof potential <ArrowDownRight size={20} />
                </a>
             </div>

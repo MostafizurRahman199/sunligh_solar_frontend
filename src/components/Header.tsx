@@ -26,7 +26,7 @@ export default function Header({ isAboutPage = false, isContactPage = false, isS
     { name: 'Projects', href: '#projects' },
     { name: 'Testimonials', href: '#testimonials' },
     { name: 'FAQ', href: '#faq' },
-    { name: 'Contact', href: '#/contact' },
+    { name: 'Contact', href: '#contact' },
   ];
 
   return (
@@ -131,7 +131,7 @@ export default function Header({ isAboutPage = false, isContactPage = false, isS
                   <span>Pay Online / Checkout</span>
                 </a>
                 <a
-                  href="#/contact"
+                  href="#contact"
                   className="bg-brand-navy text-white text-center py-3 rounded-xl font-bold text-lg"
                   onClick={() => setMobileMenuOpen(false)}
                 >

@@ -45,7 +45,7 @@ export default function StickyWidgets() {
 
           {/* Mobile Bottom Sticky CTA (Hidden on md and up) */}
           <a
-            href="#/contact"
+            href="#contact"
             className="md:hidden bg-brand-navy text-white font-bold py-3 px-6 rounded-full shadow-2xl border border-white/20 flex items-center gap-2"
           >
             Get Free Quote

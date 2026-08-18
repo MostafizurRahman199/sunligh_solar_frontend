@@ -11,7 +11,6 @@ import Contact from './components/Contact';
 import Footer from './components/Footer';
 import StickyWidgets from './components/StickyWidgets';
 import About from './components/About';
-import ContactPage from './components/ContactPage';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import TermsConditions from './components/TermsConditions';
 import WarrantyInfo from './components/WarrantyInfo';
@@ -28,7 +27,7 @@ export default function App() {
     const handleHashChange = () => {
       const newHash = window.location.hash;
       setCurrentRoute(newHash);
-      if (['#/about', '#/contact', '#/privacy', '#/terms', '#/warranty', '#/login', '#/dashboard', '#/admin', '', '#'].includes(newHash)) {
+      if (['#/about', '#/privacy', '#/terms', '#/warranty', '#/login', '#/dashboard', '#/admin', '', '#'].includes(newHash)) {
          window.scrollTo(0, 0);
       }
     };
@@ -37,7 +36,6 @@ export default function App() {
   }, []);
 
   const isAboutPage = currentRoute === '#/about';
-  const isContactPage = currentRoute === '#/contact';
   const isPrivacyPage = currentRoute === '#/privacy';
   const isTermsPage = currentRoute === '#/terms';
   const isWarrantyPage = currentRoute === '#/warranty';
@@ -45,7 +43,7 @@ export default function App() {
   const isDashboardPage = currentRoute === '#/dashboard';
   const isAdminPage = currentRoute === '#/admin';
 
-  const isSpecialPage = isAboutPage || isContactPage || isPrivacyPage || isTermsPage || isWarrantyPage || isLoginPage || isDashboardPage || isAdminPage;
+  const isSpecialPage = isAboutPage || isPrivacyPage || isTermsPage || isWarrantyPage || isLoginPage || isDashboardPage || isAdminPage;
 
   useEffect(() => {
     if (!isSpecialPage && currentRoute && currentRoute.startsWith('#') && currentRoute !== '#' && currentRoute !== '#/') {
@@ -70,8 +68,6 @@ export default function App() {
             <AdminPanel />
           ) : isAboutPage ? (
             <About />
-          ) : isContactPage ? (
-            <ContactPage />
           ) : isPrivacyPage ? (
             <PrivacyPolicy />
           ) : isTermsPage ? (
